@@ -197,7 +197,7 @@ class ApexGame {
    */
   locatePlayerCars() {
     if (window.racingAudio) {
-      window.racingAudio.playShiftClunk();
+      window.racingAudio.playGearShift(); // correct method name
     }
 
     const p1Garage = document.querySelector('.garage-RED');
@@ -936,7 +936,7 @@ class ApexGame {
     // Case 1: Deploying out of garage onto start tile (Requires 6)
     if (initialPos === -1) {
       piece.pos = 0;
-      this.turnBanner.textContent = `${TEAM_CONFIG[teamId].carName} LAUNCHED FROM PIT LANE!`;
+      this.turnBanner.textContent = `${TEAM_CONFIG[teamId].carName} LAUNCHED FROM PIT LANE! 🏁`;
       window.racingAudio.playEngineRev(4);
       this.updateCarPosition(teamId, pieceIdx);
 
@@ -953,12 +953,14 @@ class ApexGame {
       );
 
       await this.sleep(400 / this.gameSpeed);
+      // After deploy, if roll was 6 it's already consumed; landing at pos=0
       await this.handleTileLanding(teamId, pieceIdx, 0, roll);
       return;
     }
 
     // Case 2: Stepping along track tile-by-tile
-    const targetPos = initialPos + roll;
+    // Cap targetPos to 56 (finish podium) to prevent overshoot
+    const targetPos = Math.min(initialPos + roll, 56);
     this.turnBanner.textContent = `${TEAM_CONFIG[teamId].carName} ACCELERATING (${roll} TILES)...`;
 
     for (let step = initialPos + 1; step <= targetPos; step++) {
@@ -966,19 +968,27 @@ class ApexGame {
       this.updateCarPosition(teamId, pieceIdx);
 
       // Emit exhaust smoke & tire sounds at each tile
-      const coords = getPieceCoordinates(teamId, pieceIdx, step);
+      let coords;
+      try {
+        coords = getPieceCoordinates(teamId, pieceIdx, step);
+      } catch(e) {
+        coords = { x: 7, y: 7, angle: 0 };
+      }
       const rect = this.boardEl.getBoundingClientRect();
       const tileSize = rect.width / 15;
       const posX = (coords.x + 0.5) * tileSize;
       const posY = (coords.y + 0.5) * tileSize;
 
       const isCorner = coords.trackIdx !== undefined && [5, 11, 12, 18, 24, 25, 31, 37, 38, 44, 50, 51].includes(coords.trackIdx);
-      this.particleEngine.emitTireSmoke(posX, posY, coords.angle, TEAM_CONFIG[teamId].colorHex, isCorner);
+      this.particleEngine.emitTireSmoke(posX, posY, coords.angle || 0, TEAM_CONFIG[teamId].colorHex, isCorner);
 
       if (isCorner) {
         window.racingAudio.playDriftSmoke();
       } else {
-        window.racingAudio.playNoiseBurst(0.06, 1200, 0.08, window.racingAudio.ctx?.currentTime || 0);
+        // Safe: only call noise burst if audio context is ready
+        if (window.racingAudio?.ctx) {
+          window.racingAudio.playNoiseBurst(0.06, 1200, 0.08, window.racingAudio.ctx.currentTime);
+        }
       }
 
       await this.sleep(220 / this.gameSpeed);
