@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Antiqua - Colosseum Gran Turismo | Supercar Ludo</title>
+  <meta name="description" content="High-octane Supercar Ludo fused with Ancient Roman Colosseum racing. Features 60fps exhaust smoke drift particles, an interactive 6-speed manual gearbox dice shifter, and catastrophic car crash collision animations!">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-wrapper">
+    <!-- Header: Ancient Emblem, Title & Quick Controls -->
+    <header>
+      <div class="title-group">
+        <div class="ancient-emblem">🏛️🏎️</div>
+        <div class="logo-text">
+          <h1>APEX ANTIQUA</h1>
+          <p>COLOSSEUM GRAN TURISMO • SUPERCAR LUDO</p>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button id="speed-btn" class="hud-btn" title="Toggle gameplay speed">🏎️ NORMAL</button>
+        <button id="audio-btn" class="hud-btn" title="Toggle racing SFX">🔊 SOUND ON</button>
+        <button id="rules-btn" class="hud-btn" title="View Grand Prix Rules">📖 RULES</button>
+        <button id="new-game-btn" class="hud-btn" title="Start a new race">⚙️ RACE SETUP</button>
+      </div>
+    </header>
+
+    <!-- Main Arena: Circuit Board & Cockpit Gearbox HUD -->
+    <main class="arena-container">
+      <!-- Race Track Viewport -->
+      <section class="board-viewport" aria-label="Colosseum Race Track">
+        <!-- 4 Corner Colosseum Torch Braziers -->
+        <div class="colosseum-brazier brazier-tl"></div>
+        <div class="colosseum-brazier brazier-tr"></div>
+        <div class="colosseum-brazier brazier-bl"></div>
+        <div class="colosseum-brazier brazier-br"></div>
+
+        <!-- Orientation & Sector Header for Clear Visual Identification -->
+        <div class="track-orientation-header">
+          <div class="circuit-info-chip p1-chip">
+            <span class="live-pulse-dot"></span>
+            <span>YOUR BASE: <strong>BOTTOM-LEFT (P1)</strong></span>
+          </div>
+          <div class="circuit-info-chip start-chip">
+            <span>🏁</span>
+            <span>GRID: <strong>TILE #40</strong></span>
+          </div>
+          <div class="circuit-info-chip flow-chip">
+            <span>↻</span>
+            <span>FLOW: <strong>CLOCKWISE</strong></span>
+          </div>
+          <button id="locate-p1-btn" class="locate-hud-btn" title="Flash highlight Player 1 cars & garage">
+            🎯 LOCATE MY CARS
+          </button>
+        </div>
+
+        <!-- Interactive 15x15 Ludo Race Track -->
+        <div id="ludo-board">
+          <svg id="board-svg" viewBox="0 0 100 100"></svg>
+          <canvas id="fx-canvas"></canvas>
+          <div id="cars-container"></div>
+        </div>
+
+        <!-- Dynamic Car Crash / Accident Alert Banner -->
+        <div id="crash-banner">
+          <div class="crash-header">
+            <span style="font-size: 2rem;">💥</span>
+            <span class="crash-title">CATASTROPHIC T-BONE CRASH!</span>
+            <span style="font-size: 2rem;">💥</span>
+          </div>
+          <div class="crash-details">
+            <strong id="crash-attacker">Crimson Centurion</strong> violently totaled <strong id="crash-victim">Viper Apex</strong>!
+          </div>
+          <div class="crash-sub">WRECKAGE TOWED BACK TO PIT GARAGE • NITRO BONUS TURN GRANTED!</div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Telemetry & Manual 6-Speed Gearbox -->
+      <aside class="cockpit-dashboard" aria-label="Cockpit Controls">
+        <!-- Telemetry & Driver Status -->
+        <div class="telemetry-card">
+          <div class="active-driver-info">
+            <div id="active-team-badge" class="driver-badge"></div>
+            <div>
+              <div class="driver-label">ACTIVE RACING TEAM</div>
+              <div id="active-player-name" class="driver-name">Crimson Centurion</div>
+            </div>
+          </div>
+          <div class="driver-sector-brief">
+            <span class="sector-pill p1-sector-pill">📍 SOUTH-WEST PIT (BOTTOM-LEFT)</span>
+            <span class="sector-pill p1-start-pill">🏁 START: TILE #40</span>
+          </div>
+          <div id="turn-banner" class="turn-status-banner">YOUR TURN: ENGAGE SHIFTER!</div>
+        </div>
+
+        <!-- 3D Gated Gearbox Shifter Console (1 Knob / 1 Die) -->
+        <div class="gearbox-console">
+          <div class="console-header">
+            <div class="console-title">6-SPEED GATED TRANSMISSION</div>
+            <div class="digital-gear-display">
+              <span class="label">GEAR</span>
+              <span id="digital-gear" class="single-gear-val">N</span>
+            </div>
+          </div>
+
+          <!-- Tachometer Analog Gauge (0 - 8000 RPM) -->
+          <div class="tachometer-widget">
+            <svg class="tachometer-svg" viewBox="0 0 190 110">
+              <defs>
+                <linearGradient id="tachoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00e676" />
+                  <stop offset="65%" stop-color="#ffc400" />
+                  <stop offset="85%" stop-color="#ff2a44" />
+                </linearGradient>
+              </defs>
+              <!-- Gauge Arc -->
+              <path d="M 25,95 A 70,70 0 0,1 165,95" fill="none" stroke="#222" stroke-width="12" stroke-linecap="round" />
+              <path d="M 25,95 A 70,70 0 0,1 165,95" fill="none" stroke="url(#tachoGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="1, 4" />
+              <!-- Ticks and RPM Labels -->
+              <text x="22" y="106" fill="#888" font-size="9" font-family="'Orbitron', monospace">0</text>
+              <text x="45" y="48" fill="#888" font-size="9" font-family="'Orbitron', monospace">2</text>
+              <text x="90" y="24" fill="#888" font-size="9" font-family="'Orbitron', monospace">4</text>
+              <text x="135" y="48" fill="#ffc400" font-size="9" font-family="'Orbitron', monospace">6</text>
+              <text x="162" y="106" fill="#ff2a44" font-size="9" font-weight="bold" font-family="'Orbitron', monospace">8k</text>
+              <!-- Tach Needle -->
+              <g id="tach-needle" class="tach-needle">
+                <line x1="95" y1="95" x2="95" y2="32" stroke="#ff2a44" stroke-width="3" stroke-linecap="round" />
+                <circle cx="95" cy="95" r="7" fill="#ffd700" stroke="#111" stroke-width="2" />
+              </g>
+            </svg>
+            <div class="rpm-indicator"><span id="rpm-readout">800</span> RPM</div>
+          </div>
+
+          <!-- Chrome H-Pattern Gated Shifter Plate (1 Knob) -->
+          <div class="shifter-housing" id="shifter-single" title="Click knob or button to shift gear">
+            <svg class="h-gate-svg" viewBox="0 0 170 150">
+              <!-- Chrome Bezel Plate -->
+              <rect x="6" y="6" width="158" height="138" rx="12" fill="#18171e" stroke="#88795d" stroke-width="2" />
+              <!-- H-Gate Cutouts: 3 vertical slots and 1 horizontal neutral rail -->
+              <!-- Left slot: 1 & 2 -->
+              <line x1="50" y1="32" x2="50" y2="118" stroke="#000" stroke-width="13" stroke-linecap="round" />
+              <line x1="50" y1="32" x2="50" y2="118" stroke="#333" stroke-width="8" stroke-linecap="round" />
+              <!-- Middle slot: 3 & 4 -->
+              <line x1="85" y1="32" x2="85" y2="118" stroke="#000" stroke-width="13" stroke-linecap="round" />
+              <line x1="85" y1="32" x2="85" y2="118" stroke="#333" stroke-width="8" stroke-linecap="round" />
+              <!-- Right slot: 5 & 6 -->
+              <line x1="120" y1="32" x2="120" y2="118" stroke="#000" stroke-width="13" stroke-linecap="round" />
+              <line x1="120" y1="32" x2="120" y2="118" stroke="#333" stroke-width="8" stroke-linecap="round" />
+              <!-- Horizontal Neutral Crossbar -->
+              <line x1="50" y1="75" x2="120" y2="75" stroke="#000" stroke-width="13" stroke-linecap="round" />
+              <line x1="50" y1="75" x2="120" y2="75" stroke="#333" stroke-width="8" stroke-linecap="round" />
+
+              <!-- Engraved Roman Numerals (I to VI) -->
+              <text x="50" y="24" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">I</text>
+              <text x="50" y="136" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">II</text>
+              <text x="85" y="24" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">III</text>
+              <text x="85" y="136" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">IV</text>
+              <text x="120" y="24" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">V</text>
+              <text x="120" y="136" fill="#ffd700" font-family="'Cinzel', serif" font-weight="bold" font-size="11" text-anchor="middle">VI</text>
+            </svg>
+
+            <!-- 1 Shift Lever Assembly & Chrome Ball Knob -->
+            <div class="gear-lever-assembly">
+              <div id="gear-knob" class="gear-knob gear-knob-main">
+                <div class="knob-insert">
+                  <span>⚙️</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clutch & Shift Action Button -->
+          <button id="shift-btn" class="shift-action-btn">
+            <span>⚡</span>
+            <span>ENGAGE CLUTCH & SHIFT GEAR</span>
+          </button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Modal: Race Settings & Team Setup -->
+  <div id="settings-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <button id="close-settings" class="close-btn">&times;</button>
+      <h2>🏎️ GRAND PRIX SETUP</h2>
+      <p>Configure competing teams and pilot controls (Human vs Bot AI)</p>
+
+      <div class="settings-group">
+        <label>NUMBER OF RACING TEAMS</label>
+        <div style="display: flex; gap: 14px; margin-top: 6px;">
+          <label><input type="radio" name="player-count" value="2"> 2 Teams</label>
+          <label><input type="radio" name="player-count" value="3"> 3 Teams</label>
+          <label><input type="radio" name="player-count" value="4" checked> 4 Teams</label>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <label>PILOT SELECTION (HUMAN VS BOT)</label>
+        <div class="player-toggles">
+          <div class="toggle-card">
+            <input type="checkbox" id="check-red-human" checked>
+            <span style="color: #ff2a44; font-weight: bold;">Crimson (P1)</span>
+          </div>
+          <div class="toggle-card">
+            <input type="checkbox" id="check-green-human">
+            <span style="color: #00e676; font-weight: bold;">Viper (Bot)</span>
+          </div>
+          <div class="toggle-card">
+            <input type="checkbox" id="check-yellow-human">
+            <span style="color: #ffc400; font-weight: bold;">Solaris (Bot)</span>
+          </div>
+          <div class="toggle-card">
+            <input type="checkbox" id="check-blue-human">
+            <span style="color: #00b0ff; font-weight: bold;">Triton (Bot)</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-custom-game" class="shift-action-btn" style="margin-top: 14px;">
+        START CHAMPIONSHIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Illustrated Rulebook -->
+  <div id="rules-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 580px;">
+      <button id="close-rules" class="close-btn">&times;</button>
+      <h2>🏛️ COLOSSEUM LUDO RULES</h2>
+      <p>Master the ancient asphalt with speed, tactics, and ruthless collisions</p>
+
+      <div class="rules-list">
+        <div class="rule-item">
+          <span class="icon">⚙️</span>
+          <div><strong>6-Speed Gearbox Dice:</strong> Shift the gated manual transmission to roll <strong>1 to 6</strong>. Just like classic Ludo, rolling a <strong>Gear 6 (VI)</strong> grants an immediate <strong>Bonus Roll</strong>!</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">🚀</span>
+          <div><strong>Pit Exit Launch:</strong> Shift into <strong>Gear 6 (VI)</strong> to deploy a supercar from your Pit Stall Garage onto your START grid.</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">💥</span>
+          <div><strong>Accident Collisions:</strong> Land on an opponent supercar on any standard tile to trigger a <strong>Catastrophic T-Bone Crash</strong>! The victim spins out and is towed to garage, while you earn an extra Nitro Bonus Turn!</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">🛡️</span>
+          <div><strong>Ancient Laurel Safe Zones:</strong> Starting tiles and golden star tiles (★) are sanctified safe zones where cars cannot crash each other.</div>
+        </div>
+        <div class="rule-item">
+          <span class="icon">🏆</span>
+          <div><strong>Podium Victory:</strong> Navigate your 4 supercars around the full 52-tile circuit and up your home straight into the Colosseum Center Podium with exact rolls to claim 1st place!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Victory Podium Ceremony -->
+  <div id="victory-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="podium-icon">🏆</div>
+      <h2 id="winner-title">CRIMSON CENTURION WINS!</h2>
+      <p>All 4 supercars have conquered the Colosseum circuit and ascended the imperial winner's podium!</p>
+      <button id="restart-game-btn" class="shift-action-btn">
+        ENTER NEW CHAMPIONSHIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="audio.js"></script>
+  <script src="particles.js"></script>
+  <script src="ludoRules.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

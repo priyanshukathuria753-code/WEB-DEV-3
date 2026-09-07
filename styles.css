@@ -1,0 +1,912 @@
+/* ==========================================================================
+   APEX ANTIQUA: COLOSSEUM GRAN TURISMO
+   Ancient Imperial Colosseum meets High-Octane Hypercar Circuit
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+
+:root {
+  --bg-deep: #08070a;
+  --bg-slate: #121017;
+  --bg-surface: rgba(22, 20, 30, 0.85);
+  --gold-imperial: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.4);
+  --red-nitro: #ff2a44;
+  --green-apex: #00e676;
+  --yellow-solaris: #ffc400;
+  --blue-triton: #00b0ff;
+  --text-main: #f0edf5;
+  --text-muted: #9590a5;
+  --border-gold: rgba(212, 175, 55, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --font-ancient: 'Cinzel', serif;
+  --font-racing: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 10% 90%, rgba(255, 42, 68, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(0, 176, 255, 0.06) 0%, transparent 50%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0, rgba(255,255,255,0.01) 1px, transparent 0, transparent 40px);
+}
+
+/* Screen shake effect on catastrophic car collision */
+.screen-shake {
+  animation: shakeKeyframe 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shakeKeyframe {
+  10%, 90% { transform: translate3d(-3px, 0, 0) scale(1.01); }
+  20%, 80% { transform: translate3d(5px, 0, 0) scale(1.02); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0) scale(1.01); }
+  40%, 60% { transform: translate3d(6px, 0, 0) scale(1.0); }
+}
+
+#game-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  position: relative;
+}
+
+/* ==========================================================================
+   Header & Navigation
+   ========================================================================== */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ancient-emblem {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 10px var(--gold-glow));
+}
+
+.logo-text h1 {
+  font-family: var(--font-ancient);
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, #fff2c6 0%, #ffd700 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+
+.logo-text p {
+  font-family: var(--font-racing);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  font-family: var(--font-racing);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-imperial);
+  color: #fff;
+  box-shadow: 0 0 12px var(--gold-glow);
+  transform: translateY(-1px);
+}
+
+.hud-btn.nitro-active {
+  background: rgba(255, 42, 68, 0.25);
+  border-color: var(--red-nitro);
+  color: #ff8899;
+  box-shadow: 0 0 14px rgba(255, 42, 68, 0.5);
+}
+
+/* ==========================================================================
+   Main Game Arena Layout
+   ========================================================================== */
+
+main.arena-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  flex: 1;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  main.arena-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Board Arena Frame */
+.board-viewport {
+  position: relative;
+  background: radial-gradient(circle at center, #17151e 0%, #0c0b10 100%);
+  border: 2px solid var(--border-gold);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Colosseum Torch Braziers on 4 Corners */
+.colosseum-brazier {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff6600 0%, #992200 60%, transparent 80%);
+  filter: blur(4px);
+  animation: brazierFlicker 1.8s infinite alternate ease-in-out;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.brazier-tl { top: 12px; left: 12px; }
+.brazier-tr { top: 12px; right: 12px; }
+.brazier-bl { bottom: 12px; left: 12px; }
+.brazier-br { bottom: 12px; right: 12px; }
+
+@keyframes brazierFlicker {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 0.95; }
+  100% { transform: scale(1.0); opacity: 0.75; }
+}
+
+/* Track Orientation & Sector Identifier Bar */
+.track-orientation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  max-width: min(82vh, 640px);
+  background: rgba(16, 14, 22, 0.88);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.circuit-info-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-racing);
+  font-size: 0.73rem;
+  color: #cfc9db;
+  letter-spacing: 0.5px;
+}
+
+.p1-chip strong {
+  color: #ff334b;
+  text-shadow: 0 0 10px rgba(255, 51, 75, 0.8);
+}
+
+.start-chip strong {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.flow-chip strong {
+  color: #00e676;
+}
+
+.live-pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff2a44;
+  box-shadow: 0 0 10px #ff2a44;
+  animation: liveDotPulse 1.2s infinite ease-in-out;
+  display: inline-block;
+}
+
+@keyframes liveDotPulse {
+  0% { transform: scale(0.85); opacity: 0.7; box-shadow: 0 0 4px #ff2a44; }
+  50% { transform: scale(1.35); opacity: 1; box-shadow: 0 0 16px #ff2a44, 0 0 25px rgba(255, 42, 68, 0.6); }
+  100% { transform: scale(0.85); opacity: 0.7; box-shadow: 0 0 4px #ff2a44; }
+}
+
+.locate-hud-btn {
+  background: linear-gradient(135deg, #ff2a44 0%, #b80018 100%);
+  color: #ffffff;
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: var(--font-racing);
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px rgba(255, 42, 68, 0.4);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.locate-hud-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 0 20px rgba(255, 42, 68, 0.9), 0 0 10px #ffd700;
+  filter: brightness(1.15);
+}
+
+.locate-hud-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Ludo Race Track Container */
+#ludo-board {
+  position: relative;
+  width: min(82vh, 640px);
+  height: min(82vh, 640px);
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
+#board-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Particle Canvas Overlay */
+#fx-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* Supercar Pieces Container */
+#cars-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* Individual Supercar Token */
+.car-token {
+  position: absolute;
+  pointer-events: auto;
+  cursor: default;
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.car-selectable {
+  cursor: pointer;
+  animation: selectablePulse 1s infinite alternate;
+}
+
+@keyframes selectablePulse {
+  0% { filter: drop-shadow(0 0 8px #ffffff) brightness(1.2); transform: translate(-50%, -50%) scale(1.0); }
+  100% { filter: drop-shadow(0 0 20px #ffd700) brightness(1.4); transform: translate(-50%, -50%) scale(1.16); }
+}
+
+.car-crashing {
+  animation: crashSpinout 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+@keyframes crashSpinout {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1.2); filter: brightness(2) contrast(1.5); }
+  50% { transform: translate(-50%, -50%) rotate(360deg) scale(1.4); filter: brightness(3) drop-shadow(0 0 25px #ff2200); }
+  100% { transform: translate(-50%, -50%) rotate(720deg) scale(0.3); opacity: 0; }
+}
+
+/* Finished Car in Center Circle */
+.car-finished {
+  transform: translate(-50%, -50%) scale(0.75) !important;
+  opacity: 0.95;
+}
+
+/* ==========================================================================
+   Dashboard & Gearbox Shifter Console
+   ========================================================================== */
+
+.cockpit-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Telemetry Card: Active Driver Status */
+.telemetry-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.active-driver-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.driver-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  transition: all 0.3s;
+}
+
+.driver-label {
+  font-family: var(--font-racing);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+}
+
+.driver-name {
+  font-family: var(--font-ancient);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* Player Sector Brief Pill in Telemetry HUD */
+.driver-sector-brief {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 12px 0;
+  font-family: var(--font-racing);
+  font-size: 0.68rem;
+  letter-spacing: 0.5px;
+}
+
+.sector-pill {
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.p1-sector-pill {
+  background: rgba(255, 42, 68, 0.16);
+  border: 1px solid #ff2a44;
+  color: #ff7084;
+  box-shadow: 0 0 8px rgba(255, 42, 68, 0.25);
+}
+
+.p1-start-pill {
+  background: rgba(255, 215, 0, 0.14);
+  border: 1px solid #ffd700;
+  color: #ffe066;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+.turn-status-banner {
+  background: rgba(0, 0, 0, 0.45);
+  border-left: 3px solid var(--gold-imperial);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--font-racing);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: #ffea9f;
+  animation: bannerFade 0.4s ease-in-out;
+}
+
+/* ==========================================================================
+   Main Player (P1) Side & Track Realistic Animations
+   ========================================================================== */
+
+.your-main-side {
+  animation: p1BasePulse 2.4s infinite alternate ease-in-out;
+}
+
+@keyframes p1BasePulse {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(255, 42, 68, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 16px rgba(255, 42, 68, 0.85)) drop-shadow(0 0 6px #ffd700);
+  }
+}
+
+.player-start-tile {
+  animation: p1StartGlow 1.8s infinite alternate ease-in-out;
+}
+
+@keyframes p1StartGlow {
+  0% {
+    filter: drop-shadow(0 0 3px rgba(255, 42, 68, 0.4));
+  }
+  100% {
+    filter: drop-shadow(0 0 14px #ff2a44) brightness(1.25);
+  }
+}
+
+/* Temporary Ping Highlight triggered by "LOCATE MY CARS" */
+.garage-ping {
+  animation: garageFlash 0.5s 5 ease-in-out !important;
+}
+
+@keyframes garageFlash {
+  0%, 100% {
+    filter: drop-shadow(0 0 25px #ff2a44) brightness(1.6);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #ff2a44) brightness(1.0);
+  }
+}
+
+.tile-ping {
+  animation: tileFlash 0.45s 6 ease-in-out !important;
+}
+
+@keyframes tileFlash {
+  0%, 100% {
+    filter: drop-shadow(0 0 22px #ffd700) brightness(1.8);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px #ffd700) brightness(1.1);
+  }
+}
+
+.car-locate-ping {
+  animation: carPingAnim 0.45s 6 ease-in-out !important;
+}
+
+@keyframes carPingAnim {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1.35) !important;
+    filter: drop-shadow(0 0 24px #ffffff) drop-shadow(0 0 12px #ff2a44) brightness(1.9) !important;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.0) !important;
+  }
+}
+
+/* 3D Gearbox Shift Console */
+.gearbox-console {
+  background: linear-gradient(145deg, #1b1922 0%, #0d0c10 100%);
+  border: 2px solid #443c2c;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.console-title {
+  font-family: var(--font-racing);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--gold-imperial);
+}
+
+.digital-gear-display {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.digital-gear-display .label {
+  font-family: var(--font-racing);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.single-gear-val {
+  font-family: var(--font-racing);
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #00ffff;
+  text-shadow: 0 0 14px rgba(0, 255, 255, 0.8);
+  min-width: 26px;
+  text-align: center;
+}
+
+/* Tachometer RPM Gauge */
+.tachometer-widget {
+  position: relative;
+  width: 190px;
+  height: 105px;
+  margin-bottom: 12px;
+}
+
+.tachometer-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tach-needle {
+  transform-origin: 95px 95px;
+  transform: rotate(-120deg);
+  transition: transform 0.28s cubic-bezier(0.2, 0.85, 0.4, 1.2);
+}
+
+.rpm-indicator {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-racing);
+  font-size: 0.75rem;
+  color: #ffaa00;
+  letter-spacing: 1px;
+}
+
+/* Chrome H-Pattern Gated Shifter Housing (1 Knob) */
+.shifter-housing {
+  position: relative;
+  width: 170px;
+  height: 150px;
+  background: radial-gradient(circle, #25222e 0%, #100f14 80%);
+  border: 3px solid #665b45;
+  border-radius: 14px;
+  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.8), 0 6px 16px rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.h-gate-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gear-lever-assembly {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gear-knob {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #c0c0c0 40%, #555555 85%, #222222 100%);
+  border: 1px solid #ffffff;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.8), inset 0 2px 4px #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate(0, 0);
+  transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.35, 1.25);
+  z-index: 20;
+}
+
+.knob-insert {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #111;
+  border: 1px solid var(--gold-imperial);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.knob-insert span {
+  font-family: var(--font-racing);
+  font-size: 0.65rem;
+  color: var(--gold-imperial);
+  font-weight: 900;
+}
+
+/* Primary Clutch / Shift Action Button */
+.shift-action-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #d4af37 0%, #aa8014 100%);
+  border: none;
+  border-radius: 10px;
+  color: #0b0906;
+  font-family: var(--font-racing);
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.shift-action-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.shift-action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+}
+
+.shift-action-btn:disabled {
+  background: #2a2830;
+  color: #6a6677;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Catastrophic Car Crash / Accident Alert Banner
+   ========================================================================== */
+
+#crash-banner {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  background: linear-gradient(135deg, rgba(160, 0, 20, 0.95) 0%, rgba(50, 0, 5, 0.98) 100%);
+  border: 3px solid #ff3344;
+  box-shadow: 0 0 50px rgba(255, 42, 68, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 24px 36px;
+  text-align: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+#crash-banner.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.crash-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.crash-title {
+  font-family: var(--font-racing);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 3px;
+  text-shadow: 0 0 15px #ff2a44;
+}
+
+.crash-details {
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  color: #ffcccc;
+  margin-bottom: 6px;
+}
+
+.crash-details strong {
+  color: #ffeb3b;
+}
+
+.crash-sub {
+  font-family: var(--font-racing);
+  font-size: 0.8rem;
+  color: #ff8899;
+  letter-spacing: 1.5px;
+}
+
+/* ==========================================================================
+   Modals: Victory Podium, Rules, and Settings
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 3, 6, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: var(--bg-surface);
+  border: 2px solid var(--gold-imperial);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px var(--gold-glow);
+  text-align: center;
+  position: relative;
+}
+
+.modal-card h2 {
+  font-family: var(--font-ancient);
+  font-size: 1.6rem;
+  color: #ffd700;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.modal-card p {
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.podium-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+  animation: trophyFloat 2s infinite ease-in-out;
+}
+
+@keyframes trophyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.rules-list {
+  text-align: left;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.rule-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 3px solid var(--gold-imperial);
+}
+
+.rule-item .icon {
+  font-size: 1.2rem;
+}
+
+.settings-group {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.settings-group label {
+  display: block;
+  font-family: var(--font-racing);
+  font-size: 0.8rem;
+  color: var(--gold-imperial);
+  margin-bottom: 8px;
+}
+
+.player-toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.toggle-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
